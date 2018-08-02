@@ -1,0 +1,49 @@
+- name: 停止容器相关服务
+  systemd:
+    name: "{{ item }}"
+    enabled: no
+    state: stopped
+    force: yes
+  loop:
+    - kubelet
+    - docker
+  ignore_errors: yes
+
+- name: 删除集群环境
+  shell: "kubeadm reset"
+  ignore_errors: yes
+
+- name: 卸载容器相关环境
+  yum:
+    name: "{{ packages }}"
+    state: absent
+  vars:
+    packages:
+      - docker-ce
+      - docker.io
+      - docker
+      - docker-client
+      - docker-common
+      - kubectl
+      - kubernetes-cni
+      - kubeadm
+      - kubelet
+
+- name: 清除残留配置
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/var/lib/docker"
+    # - "/var/run/docker"
+    - "/etc/kubernetes"
+    - "$HOME/.kube"
+    - "$HOME/.helm"
+    - "/var/lib/dockershim"
+    - "/usr/libexec/kubernetes"
+    - "/var/lib/etcd/"
+
+
+# - name: 重启服务器
+#   shell: reboot
+#   ignore_errors: yes

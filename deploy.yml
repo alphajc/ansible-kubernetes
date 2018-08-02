@@ -1,0 +1,15 @@
+- name: 部署k8s集群master节点
+  hosts: master
+  remote_user: root
+  gather_facts: no
+  roles:
+    - common
+    - master
+
+- name: 部署k8s集群worker节点
+  hosts: worker
+  remote_user: root
+  gather_facts: no
+  roles:
+    - common
+    - worker

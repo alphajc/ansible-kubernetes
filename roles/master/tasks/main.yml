@@ -1,0 +1,47 @@
+- name: 上传docker镜像
+  copy:
+    src: "{{ item }}"
+    dest: "/tmp/ansible/images/"
+  with_fileglob:
+    - "files/images/*"
+  register: imgs
+
+- name: 装载docker镜像
+  shell: "docker load -i {{ item }}"
+  loop: "{{ imgs.results | map(attribute='dest') | list }}"
+
+- name: 初始化master
+  shell: kubeadm init --pod-network-cidr=192.168.0.0/16 --kubernetes-version v1.10.1 > /tmp/kubeadm.log 2>&1
+  args:
+    executable: /bin/bash
+
+- name: 配置kubectl
+  script: setup.sh
+  args:
+    executable: /bin/bash
+
+- name: 配置网络
+  shell: |
+    kubectl apply -f \
+    https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/kubeadm/1.7/calico.yaml
+
+- name: 生成worker注册脚本
+  shell: |
+    cat /tmp/kubeadm.log | tail -n 2 | sed '1s/$/& --ignore-preflight-errors=cri/' > /tmp/worker_setup.sh
+  args:
+    executable: /bin/bash
+
+- name: 获取worker注册脚本
+  fetch:
+    src: /tmp/worker_setup.sh
+    dest: roles/worker/files/
+    flat: yes
+
+# - name: 清理临时文件
+#   file:
+#     path: "{{ item }}"
+#     state: absent
+#   loop:
+#     - "/tmp/ansible"
+#     - "/tmp/kubeadm.log"
+#     - "/tmp/worker_setup.sh"

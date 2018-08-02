@@ -1,0 +1,7 @@
+- name: 清理机器环境
+  hosts: all
+  remote_user: root
+  gather_facts: no
+
+  roles:
+    - cleanup

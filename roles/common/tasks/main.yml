@@ -1,0 +1,49 @@
+- name: 安装docker
+  yum:
+    name: docker
+    state: present
+
+- name: 启动docker
+  systemd:
+    name: docker
+    enabled: yes
+    state: started
+
+- name: 上传安装包
+  copy:
+    src: "{{ item }}"
+    dest: "/tmp/ansible/packages/"
+  with_fileglob:
+    - "files/packages/*"
+  register: pkgs
+
+- name: 关闭SELinux
+  shell: "setenforce 0"
+  ignore_errors: yes
+
+- name: 安装kubeadm
+  yum:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages: "{{ pkgs.results | map(attribute='dest') | list }}"
+
+- name: 设置kubelet开机自启
+  systemd:
+    name: kubelet
+    enabled: yes
+    force: yes
+
+- sysctl:
+    name: net.bridge.bridge-nf-call-iptables
+    value: 1
+    state: present
+    sysctl_set: yes
+    reload: yes
+
+
+
+# - name: 移除安装包
+#   file:
+#     path: /tmp/ansible/packages/
+#     state: absent
