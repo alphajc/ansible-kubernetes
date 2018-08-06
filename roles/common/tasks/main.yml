@@ -3,7 +3,7 @@
     name: docker
     state: present
 
-- name: 启动docker
+- name: 启动docker并设置开机自启
   systemd:
     name: docker
     enabled: yes

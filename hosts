@@ -4,3 +4,16 @@ docker2 ansible_host=118.178.129.180 ansible_user=chenjj ansible_become=yes
 [worker]
 docker0 ansible_host=120.26.102.245 ansible_user=chenjj ansible_become=yes
 docker1 ansible_host=114.55.177.195 ansible_user=chenjj ansible_become=yes
+
+; consul server
+[consuls]
+docker0
+docker1
+docker2
+
+; consul client
+[consulc]
+
+[consul:children]
+consuls
+consulc

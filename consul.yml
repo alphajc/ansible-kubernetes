@@ -1,0 +1,7 @@
+- name: 部署consul
+  hosts: consul
+  remote_user: root
+  vars_files:
+    - "roles/consul/vars/{% if 'consuls' in group_names %}consuls{% else %}consulc{% endif %}.yml"
+  roles:
+    - consul

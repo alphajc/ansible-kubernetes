@@ -1,0 +1,90 @@
+- name: 安装unzip
+  yum:
+    name: unzip
+    state: present
+
+- name: 安装consul
+  unarchive:
+    src: "{{ item }}"
+    dest: /bin/
+  with_fileglob:
+    - "zips/*"
+
+- name: 移除consul脏数据
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /data/consul
+    - /opt/consul
+
+- name: 保证相关consul路径
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - /data/consul
+    - /opt/consul
+
+- name: 渲染consul配置文件
+  template:
+    src: "{{ conf }}"
+    dest: "{{ consul_config }}"
+
+- name: 渲染consul-template配置文件
+  template:
+    src: consul-template.hcl.j2
+    dest: "{{ template_config }}"
+
+- name: 上传nginx模板文件
+  copy:
+    src: proxy_consul.conf.tmpl
+    dest: /opt/consul/
+
+- name: 安装nginx
+  yum:
+    name: nginx
+    state: present
+
+- name: 渲染nginx配置文件
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+
+- name: 启动consul
+  shell: "pkill consul; nohup /bin/consul agent -config-file={{ consul_config }} >> {{ consul_log }} &"
+  args:
+    executable: /bin/bash
+  ignore_errors: yes
+
+- name: 添加自启动
+  blockinfile:
+    path: /etc/rc.local
+    marker: "# {mark} consul套件自启动"
+    block: |
+      nohup /bin/consul agent -config-file={{ consul_config }} >> {{ consul_log }} &
+      nohup /bin/consul-template -config {{ template_config }} >> {{ template_log }} &
+
+- name: 安装curl
+  yum:
+    name: curl
+    state: present
+
+- name: 等待leader选举成功
+  get_url:
+    url: http://{{ ansible_tunl0.ipv4.address }}:8500/v1/status/leader
+    dest: /tmp/
+  register: result
+  until: result.status_code == 200
+  retries: 5
+  delay: 2
+  notify: 启动consul-template
+
+- name: 启动nginx并设置开机自启
+  systemd:
+    name: nginx
+    enabled: yes
+    state: started
+
+# - debug:
+#     msg: "{{ result }}"
