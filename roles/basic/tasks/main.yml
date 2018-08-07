@@ -1,0 +1,23 @@
+---
+- name: 代理consul界面
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - src: consul.conf
+      dest: /etc/nginx/conf.d/
+    - src: passwd.db
+      dest: /opt/consul/
+
+- name: 重载nginx
+  systemd:
+    name: nginx
+    state: reloaded
+
+- name: 安装python-consul
+  pip:
+    name: python-consul
+
+- name: 注册commonDB
+  consul: "{{ item }}"
+  loop: "{{ basic_services }}"

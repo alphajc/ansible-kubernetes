@@ -1,0 +1,55 @@
+---
+basic_services:
+- service_name: commonDB#10.168.233.185#7290
+  service_address: 10.168.233.185
+  service_port: 7290
+  interval: 15s
+  timeout: 10s
+
+- service_name: reportDB#10.51.28.56#7210
+  service_address: 10.51.28.56
+  service_port: 7210
+  interval: 15s
+  timeout: 10s
+
+- service_name: clogDB#10.168.233.185#7290
+  service_address: 10.168.233.185
+  service_port: 7290
+  interval: 15s
+  timeout: 10s
+
+- service_name: ccRedis#10.168.140.30#6379
+  service_address: 10.168.140.30
+  service_port: 6379
+  interval: 15s
+  timeout: 10s
+
+- service_name: ccRedisSentinel#121.40.194.97#29379
+  service_address: 121.40.194.97
+  service_port: 29379
+  interval: 15s
+  timeout: 10s
+
+- service_name: esHttp#10.168.40.127#9900
+  service_address: 10.168.40.127
+  service_port: 9900
+  interval: 15s
+  timeout: 10s
+
+- service_name: esTcp#121.40.158.231#10000
+  service_address: 121.40.158.231
+  service_port: 10000
+  interval: 15s
+  timeout: 10s
+
+- service_name: solr#10.171.253.38#8090
+  service_address: 10.171.253.38
+  service_port: 8090
+  interval: 15s
+  timeout: 10s
+
+- service_name: mysql#120.26.103.8#3306
+  service_address: 120.26.103.8
+  service_port: 3306
+  interval: 15s
+  timeout: 10s

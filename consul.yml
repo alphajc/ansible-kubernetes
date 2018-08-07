@@ -5,3 +5,11 @@
     - "roles/consul/vars/{% if 'consuls' in group_names %}consuls{% else %}consulc{% endif %}.yml"
   roles:
     - consul
+
+- name: 初始化consul
+  hosts: "{{ groups['consul'][0] }}"
+  remote_user: root
+  vars_files:
+    - "roles/consul/vars/basic_services.yml"
+  roles:
+    - basic
